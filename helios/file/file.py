@@ -1,6 +1,6 @@
-import chardet
 from pathlib import Path
 from helios.text import Encoding
+import helios.file
 
 
 class File:
@@ -45,3 +45,7 @@ class File:
         else:
             context = self._path.read_text(self.encoding.value)
             output._path.write_text(context, Encoding.UTF8.value)
+
+    @staticmethod
+    def rm(file):
+        file._path.unlink()
