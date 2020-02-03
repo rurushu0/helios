@@ -1,6 +1,7 @@
 from pathlib import Path
 from helios.text import Encoding
-import helios.file
+import chardet
+import difflib
 
 
 class File:
@@ -35,6 +36,10 @@ class File:
         output._path.write_bytes(self._path.read_bytes())
         return output
 
+    @property
+    def text(self) -> str:
+        return self._path.read_text(self.encoding.value)
+
     def convert(
             self,
             file_output: str,
@@ -45,6 +50,19 @@ class File:
         else:
             context = self._path.read_text(self.encoding.value)
             output._path.write_text(context, Encoding.UTF8.value)
+
+    def diff(self, rhs) -> list:
+        text_lhs = self.text.splitlines()
+        text_rhs = rhs.text.splitlines()
+        diff_text = []
+        for line in difflib.unified_diff(
+            text_lhs,
+            text_rhs,
+            fromfile=self.full_path,
+            tofile=rhs.full_path
+        ):
+            diff_text.append(line)
+        return diff_text
 
     @staticmethod
     def rm(file):

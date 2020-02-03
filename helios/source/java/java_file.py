@@ -1,5 +1,8 @@
 from helios.file import File
 import javaproperties
+import re
+
+_PATTERN_JAVA = re.compile(r"([A-Za-z\-'\.^\W\d_ ]*)\.java$")
 
 
 class JavaSourceFile(File):
@@ -12,6 +15,6 @@ class JavaSourceFile(File):
     def properties(self) -> dict:
         return self._properties
 
-
-# import subprocess
-# subprocess.call(['java', '-jar', 'Blender.jar'])
+    @staticmethod
+    def is_java_file_name(file_path: str) -> bool:
+        return _PATTERN_JAVA.match(file_path)
