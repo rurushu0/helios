@@ -9,6 +9,7 @@ _PATTERN_DIFF_LINE_INFO = re.compile(r"^@@[\x00-\x7f]*@@$")
 _PATTERN_DIFF_LINE_LEFT = re.compile(r"^-[\x00-\x7f]*")
 _PATTERN_DIFF_LINE_RIGHT = re.compile(r"^\+[\x00-\x7f]*")
 
+
 class File:
     def __init__(self, file_path):
         super().__init__()
@@ -30,7 +31,7 @@ class File:
     @property
     def is_text(self) -> bool:
         if not self._is_text:
-            self._is_text = is_binary(self.full_path)
+            self._is_text = False if is_binary(self.full_path) else True
         return self._is_text
 
     @property
@@ -50,10 +51,14 @@ class File:
 
     @property
     def text(self) -> str:
+        if self.size == 0:
+            return ''
         if self.encoding:
             return self._path.read_text(self.encoding.value)
         else:
-            return self._path.read_bytes()
+            return self._path.read_text(Encoding.UTF8.value)
+            # raise Exception('File.text Error', f'{self.full_path}')
+            # return self._path.read_bytes()
 
     def convert(
             self,

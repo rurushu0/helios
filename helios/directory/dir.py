@@ -28,18 +28,18 @@ class Directory(object):
     ) -> list:
         files = []
         for f in self._path.iterdir():
-            if f.is_file():
+            if f.is_file() and not self.is_excluded_file(str(f)):
                 if not is_relative_path:
-                    if not self.is_excluded_file(str(f)):
-                        files.append(str(f))
+                    files.append(str(f))
                 else:
                     files.append(
                         str(f).replace(root_path, '')[1:]
                     )
             else:
                 if f.is_dir() and not self.is_excluded_dir(str(f)):
+                    Clazz = type(self)
                     files = files + \
-                        Directory(str(f))._file_list_impl(
+                        Clazz(str(f))._file_list_impl(
                             root_path, is_relative_path)
         return files
 
