@@ -19,9 +19,6 @@ def git_diff(info_1: GitInfo, info_2: GitInfo, output_path: str):
         name_repo2 += '_2'
 
     with TempDir() as work_dir:
-        Dir.remove(output_path)
-        output_dir = Dir(output_path)
-
         repo_1 = GitRepo(os.path.join(
             work_dir.path, name_repo1), info_1.remote_url)
         repo_2 = GitRepo(os.path.join(
@@ -42,6 +39,11 @@ def git_diff(info_1: GitInfo, info_2: GitInfo, output_path: str):
         JavaSourceFormatter.execute(java_files_2)
 
         diff_files = dir_1.diff_files(dir_2)
+        if not diff_files or len(diff_files) == 0:
+            return
+
+        Dir.remove(output_path)
+        output_dir = Dir(output_path)
 
         for f in diff_files.both:
             f1 = File(os.path.join(repo_1.local_path, f))
