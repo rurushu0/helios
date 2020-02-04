@@ -3,20 +3,21 @@ from helios.text import Encoding
 import chardet
 import difflib
 import re
+from binaryornot.check import is_binary
 
 _PATTERN_DIFF_LINE_INFO = re.compile(r"^@@[\x00-\x7f]*@@$")
 _PATTERN_DIFF_LINE_LEFT = re.compile(r"^-[\x00-\x7f]*")
 _PATTERN_DIFF_LINE_RIGHT = re.compile(r"^\+[\x00-\x7f]*")
-
 
 class File:
     def __init__(self, file_path):
         super().__init__()
         self._path = Path(file_path)
         if not self._path.parent.exists():
-            self._path.parent.mkdir()
+            self._path.parent.mkdir(parents=True, exist_ok=True)
             self._path.touch()
         self._encoding = None
+        self._is_text = None
 
     @property
     def full_path(self) -> str:
@@ -25,6 +26,12 @@ class File:
     @property
     def size(self) -> int:
         return self._path.stat().st_size
+
+    @property
+    def is_text(self) -> bool:
+        if not self._is_text:
+            self._is_text = is_binary(self.full_path)
+        return self._is_text
 
     @property
     def encoding(self) -> Encoding:
@@ -43,7 +50,10 @@ class File:
 
     @property
     def text(self) -> str:
-        return self._path.read_text(self.encoding.value)
+        if self.encoding:
+            return self._path.read_text(self.encoding.value)
+        else:
+            return self._path.read_bytes()
 
     def convert(
             self,
