@@ -47,9 +47,17 @@ def git_diff(info_1: GitInfo, info_2: GitInfo, output_path: str):
             f1 = File(os.path.join(repo_1.local_path, f))
             f2 = File(os.path.join(repo_2.local_path, f))
             f_output = File(os.path.join(output_dir.full_path, f + '.diff'))
+            is_differnt = False
+
             with open(f_output.full_path, 'w', encoding='utf-8') as fw:
-                fw.write('\n'.join(f1.diff(f2)))
-                fw.flush()
+                diff_texts = f1.diff(f2)
+                if len(diff_texts) > 0:
+                    is_differnt = True
+                    fw.write('\n'.join(diff_texts))
+                    fw.flush()
+
+            if not is_differnt:
+                File.rm(f_output)
 
 
 def git_repo_name(url: str) -> str:
